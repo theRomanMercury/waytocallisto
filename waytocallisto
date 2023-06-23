@@ -1,0 +1,286 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Way to Callitso</title>
+  <style>
+    * {
+      margin: 0;
+      padding: 0;
+      overflow: hidden;
+    }
+
+    body {
+      background-color: black;
+    }
+
+    canvas {
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+    }
+
+    .distance-container {
+      position: absolute;
+      right: 10px;
+      bottom: 10px;
+      color: white;
+      font-family: Arial, sans-serif;
+      font-size: 12px;
+      text-align: right;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="canvas"></canvas>
+  <div class="distance-container" id="distanceContainer"></div>
+
+  <script>
+    var canvas = document.getElementById('canvas');
+    var ctx = canvas.getContext('2d');
+    var width = canvas.width = window.innerWidth;
+    var height = canvas.height = window.innerHeight;
+
+    var sun = {
+      x: width / 2,
+      y: height / 2,
+      radius: 30,
+      color: 'yellow',
+      mass: 100000,
+      magneticField: 500 // Manyetik alan gücü
+    };
+
+    var stars = [];
+
+    function createStars() {
+      for (var i = 0; i < 200; i++) {
+        var star = {
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 1.5,
+          color: 'white',
+          twinkle: Math.random() * 2 * Math.PI, // Pırıltı açısı
+          twinkleSpeed: 0.02 // Pırıltı hızı
+        };
+
+        stars.push(star);
+      }
+    }
+
+    function drawStars() {
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = star.color;
+        ctx.fill();
+
+        // Pırıltı efekti
+        var twinkleRadius = star.radius + Math.sin(star.twinkle) * 2;
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, twinkleRadius, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(255, 255, 255, 0.3)';
+        ctx.fill();
+
+        star.twinkle += star.twinkleSpeed;
+      }
+    }
+
+    var planets = [
+      { name: 'Mercury', radius: 5, distance: 100, speed: 0.0001, color: 'gray', mass: 1, magneticField: 100, x: sun.x + 100, y: sun.y },
+      { name: 'Venus', radius: 10, distance: 150, speed: 0.00008, color: 'orange', mass: 2, magneticField: 150, x: sun.x + 150, y: sun.y },
+      { name: 'Earth', radius: 12, distance: 200, speed: 0.00005, color: 'blue', mass: 3, magneticField: 200, x: sun.x + 200, y: sun.y },
+      { name: 'Mars', radius: 8, distance: 250, speed: 0.00003, color: 'red', mass: 2, magneticField: 180, x: sun.x + 250, y: sun.y },
+      { name: 'Jupiter', radius: 25, distance: 350, speed: 0.00001, color: 'brown', mass: 30, magneticField: 300, x: sun.x + 350, y: sun.y },
+      { name: 'Saturn', radius: 20, distance: 450, speed: 0.000006, color: 'yellow', mass: 25, magneticField: 250, x: sun.x + 450, y: sun.y },
+      { name: 'Uranus', radius: 18, distance: 550, speed: 0.000004, color: 'lightblue', mass: 20, magneticField: 220, x: sun.x + 550, y: sun.y },
+      { name: 'Neptune', radius: 16, distance: 650, speed: 0.000003, color: 'darkblue', mass: 18, magneticField: 210, x: sun.x + 650, y: sun.y }
+    ];
+
+    var explosions = []; // Patlamaları tutacak dizi
+
+    function drawSun() {
+      ctx.beginPath();
+      ctx.arc(sun.x, sun.y, sun.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = sun.color;
+      ctx.fill();
+    }
+
+    function drawPlanet(planet) {
+      var angle = planet.speed * Date.now();
+
+      var x = sun.x + Math.cos(angle) * planet.distance;
+      var y = sun.y + Math.sin(angle) * planet.distance;
+
+      ctx.beginPath();
+      ctx.arc(x, y, planet.radius, 0, 2 * Math.PI);
+      ctx.fillStyle = planet.color;
+      ctx.fill();
+
+      // Manyetik alan çizgilerini çizme
+      for (var i = 0; i < 360; i += 10) {
+        var lineAngle = i * (Math.PI / 180);
+        var lineX = x + Math.cos(lineAngle) * planet.radius;
+        var lineY = y + Math.sin(lineAngle) * planet.radius;
+
+        ctx.beginPath();
+        ctx.moveTo(lineX, lineY);
+        ctx.lineTo(lineX + Math.cos(lineAngle) * planet.magneticField, lineY + Math.sin(lineAngle) * planet.magneticField);
+        ctx.strokeStyle = 'rgba(255, 255, 255, 0.1)';
+        ctx.stroke();
+      }
+    }
+
+    function createExplosion(x, y) {
+      var explosion = {
+        x: x,
+        y: y,
+        radius: 5,
+        color: 'orange',
+        strength: 50, // Patlama gücü
+        opacity: 1
+      };
+
+      explosions.push(explosion);
+    }
+
+    function drawExplosions() {
+      for (var i = 0; i < explosions.length; i++) {
+        var explosion = explosions[i];
+        ctx.beginPath();
+        ctx.arc(explosion.x, explosion.y, explosion.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = 'rgba(255, 165, 0, ' + explosion.opacity + ')';
+        ctx.fill();
+
+        explosion.radius += explosion.strength / 100; // Patlama genişlemesi
+        explosion.opacity -= 0.01; // Patlama solması
+
+        if (explosion.opacity <= 0) {
+          explosions.splice(i, 1); // Patlama tamamlandığında silinir
+          i--;
+        }
+      }
+    }
+
+    function calculateGravity(object1, object2) {
+      var dx = object2.x - object1.x;
+      var dy = object2.y - object1.y;
+      var distance = Math.sqrt(dx * dx + dy * dy);
+      var gravitationalForce = (sun.mass * object2.mass) / (distance * distance);
+
+      var angle = Math.atan2(dy, dx);
+      var forceX = Math.cos(angle) * gravitationalForce;
+      var forceY = Math.sin(angle) * gravitationalForce;
+
+      return {
+        forceX: forceX,
+        forceY: forceY
+      };
+    }
+
+    function calculateDistance(planet1, planet2) {
+      var dx = planet2.x - planet1.x;
+      var dy = planet2.y - planet1.y;
+      return Math.sqrt(dx * dx + dy * dy);
+    }
+
+    function updateDistanceDisplay() {
+      var distanceContainer = document.getElementById('distanceContainer');
+      distanceContainer.innerHTML = '';
+
+      var distances = []; // Mesafeleri tutacak dizi
+
+      for (var i = 0; i < planets.length; i++) {
+        var planet1 = planets[i];
+
+        for (var j = i + 1; j < planets.length; j++) {
+          var planet2 = planets[j];
+          var distance = calculateDistance(planet1, planet2);
+          distances.push({ planet1: planet1, planet2: planet2, distance: distance });
+        }
+      }
+
+      // Mesafeleri büyükten küçüğe sıralama
+      distances.sort(function (a, b) {
+        return b.distance - a.distance;
+      });
+
+      // Sıralanmış mesafeleri ekrana yazdırma
+      for (var k = 0; k < distances.length; k++) {
+        var distance = distances[k];
+        var distanceText = document.createElement('p');
+        distanceText.innerHTML = distance.planet1.name + ' - ' + distance.planet2.name + ': ' + distance.distance.toFixed(2);
+        distanceContainer.appendChild(distanceText);
+      }
+    }
+
+    function update() {
+      ctx.clearRect(0, 0, width, height);
+
+      drawStars(); // Yıldızları çizme
+
+      drawSun();
+
+      for (var i = 0; i < planets.length; i++) {
+        var planet = planets[i];
+        drawPlanet(planet);
+
+        var gravity = calculateGravity(sun, planet);
+        planet.x += gravity.forceX;
+        planet.y += gravity.forceY;
+
+        // Manyetik çarpışmayı kontrol etme
+        if (calculateDistance(sun, planet) <= sun.radius + planet.radius) {
+          createExplosion(planet.x, planet.y);
+          planets.splice(i, 1);
+          i--;
+        }
+      }
+
+      drawExplosions();
+      updateDistanceDisplay();
+
+      requestAnimationFrame(update);
+    }
+
+    var stars = [];
+
+    function createStars() {
+      for (var i = 0; i < 500; i++) {
+        var star = {
+          x: Math.random() * width,
+          y: Math.random() * height,
+          radius: Math.random() * 1.5,
+          color: 'white',
+          speed: Math.random() * 0.5 + 0.1 // Yıldız hızı
+        };
+
+        stars.push(star);
+      }
+    }
+
+    function drawStars() {
+      for (var i = 0; i < stars.length; i++) {
+        var star = stars[i];
+
+        ctx.beginPath();
+        ctx.arc(star.x, star.y, star.radius, 0, 2 * Math.PI);
+        ctx.fillStyle = star.color;
+        ctx.fill();
+
+        // Yıldız hareketi
+        star.x -= star.speed;
+
+        if (star.x < 0) {
+          star.x = width;
+        }
+      }
+    }
+
+    createStars();
+    update();
+  </script>
+</body>
+</html>
