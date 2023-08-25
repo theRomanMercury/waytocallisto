@@ -1,0 +1,305 @@
+<!DOCTYPE html>
+<html>
+<head>
+  <title>Enhanced TEH Representation</title>
+  <style>
+    body {
+      margin: 0;
+      display: flex;
+      font-family: Arial, sans-serif;
+    }
+    canvas {
+      border: 1px solid black;
+    }
+    .tooltip {
+      position: absolute;
+      background: #f0f0f0;
+      padding: 5px;
+      border: 1px solid #ccc;
+      font-size: 12px;
+    }
+    .info {
+      padding: 10px;
+      background-color: #f0f0f0;
+      flex: 1;
+    }
+    .component {
+      margin: 5px 0;
+      display: flex;
+      align-items: center;
+    }
+    .component-color {
+      width: 20px;
+      height: 20px;
+      margin-right: 10px;
+    }
+  </style>
+</head>
+<body>
+  <canvas id="hexCanvas"></canvas>
+  <div class="info">
+    <div class="component">
+      <div class="component-color" style="background-color: #333;"></div>
+      Interconnected Struts (Framework)
+    </div>
+    <div class="component">
+      <div class="component-color" style="background-color: #ff0000;"></div>
+      Piezoelectric Material
+    </div>
+    <div class="component">
+      <div class="component-color" style="background-color: #00ff00;"></div>
+      Energy Conversion Module
+    </div>
+    <div class="component">
+      <div class="component-color" style="background-color: #0000ff;"></div>
+      Alignment Thrusters
+    </div>
+    <div class="component">
+      <div class="component-color" style="background-color: #ff9900;"></div>
+      Gyroscopic Stabilizers
+    </div>
+    <div class="component">
+      <div class="component-color" style="background-color: #9900cc;"></div>
+      Energy Storage Unit
+    </div>
+    <div class="component">
+      <div class="component-color" style="background-color: #cc6600;"></div>
+      Wireless Energy Transmission Device
+    </div>
+  </div>
+  
+  <script>
+    const canvas = document.getElementById('hexCanvas');
+    const context = canvas.getContext('2d');
+    const rows = 5;
+    const cols = 6;
+    const hexSize = 50;
+    const yOffset = 50;
+    const colors = {
+      strut: '#333',
+      piezo: '#ff0000',
+      module: '#00ff00',
+      thruster: '#0000ff',
+      stabilizer: '#ff9900',
+      storage: '#9900cc',
+      transmission: '#cc6600'
+    };
+    
+    canvas.width = cols * hexSize * 1.5;
+    canvas.height = rows * hexSize * Math.sqrt(3) + (cols % 2) * hexSize * Math.sqrt(3) / 2 + yOffset;
+    
+    context.fillStyle = '#ffffff';
+    context.fillRect(0, 0, canvas.width, canvas.height);
+    
+    // Draw the lattice framework (interconnected struts)
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * hexSize * 1.5;
+        const y = row * hexSize * Math.sqrt(3) + (col % 2) * hexSize * Math.sqrt(3) / 2 + yOffset;
+        
+        // Draw horizontal struts
+        if (row < rows - 1) {
+          context.beginPath();
+          context.moveTo(x, y + hexSize * Math.sqrt(3) / 2);
+          context.lineTo(x + hexSize * 1.5, y + hexSize * Math.sqrt(3) / 2);
+          context.strokeStyle = colors.strut;
+          context.stroke();
+        }
+        
+        // Draw diagonal struts
+        if (col < cols - 1) {
+          context.beginPath();
+          context.moveTo(x + hexSize * 1.5, y);
+          context.lineTo(x + hexSize * 3, y + hexSize * Math.sqrt(3) / 2);
+          context.strokeStyle = colors.strut;
+          context.stroke();
+        }
+        
+        // Draw additional alignment thrusters (modify row and col conditions)
+        if ((row === 0 && col === 0) || (row === 1 && col === 1) || (row === 2 && col === 0)) {
+          drawThrusters(x, y);
+        }
+        
+        // Draw gyroscopic stabilizers (modify row and col conditions)
+        if ((row === rows - 1 && col === cols - 1) || (row === rows - 2 && col === cols - 2)) {
+          drawStabilizers(x, y);
+        }
+        
+        // Draw energy storage unit
+        if (row === Math.floor(rows / 2) && col === Math.floor(cols / 2)) {
+          drawStorageUnit(x, y);
+        }
+        
+        // Draw wireless energy transmission device
+        if (row === Math.floor(rows / 2) && col === Math.floor(cols / 2) - 1) {
+          drawTransmissionDevice(x, y);
+        }
+      }
+    }
+    
+    // Draw piezoelectric materials, energy conversion modules, hexagons, and interactive elements
+    for (let row = 0; row < rows; row++) {
+      for (let col = 0; col < cols; col++) {
+        const x = col * hexSize * 1.5;
+        const y = row * hexSize * Math.sqrt(3) + (col % 2) * hexSize * Math.sqrt(3) / 2 + yOffset;
+        
+        // Draw piezoelectric materials
+        context.fillStyle = colors.piezo;
+        context.beginPath();
+        context.arc(x, y, hexSize / 4, 0, Math.PI * 2);
+        context.closePath();
+        context.fill();
+        
+        // Draw energy conversion module
+        context.fillStyle = colors.module;
+        context.fillRect(x - hexSize / 8, y - hexSize / 8, hexSize / 4, hexSize / 4);
+        
+        // Draw hexagon
+        drawHexagon(x, y, hexSize);
+        
+        // Add interactive elements (mouseover and click)
+        canvas.addEventListener('mousemove', (event) => {
+          const rect = canvas.getBoundingClientRect();
+          const mouseX = event.clientX - rect.left;
+          const mouseY = event.clientY - rect.top;
+          if (context.isPointInPath(drawHexagonPath(x, y, hexSize), mouseX, mouseY)) {
+            showTooltip(event.clientX, event.clientY, 'Hexagon: Energy Capture');
+          } else if (context.isPointInPath(drawPiezoPath(x, y, hexSize), mouseX, mouseY)) {
+            showTooltip(event.clientX, event.clientY, 'Piezoelectric Material: Energy Generation');
+          } else if (context.isPointInPath(drawModulePath(x, y, hexSize), mouseX, mouseY)) {
+            showTooltip(event.clientX, event.clientY, 'Energy Conversion Module: Voltage Regulation');
+          } else if (context.isPointInPath(drawThrusterPath(x, y), mouseX, mouseY)) {
+            showTooltip(event.clientX, event.clientY, 'Alignment Thrusters: Orientation Control');
+          } else if (context.isPointInPath(drawStabilizerPath(x, y), mouseX, mouseY)) {
+            showTooltip(event.clientX, event.clientY, 'Gyroscopic Stabilizers: Stability Control');
+          } else if (context.isPointInPath(drawStoragePath(x, y), mouseX, mouseY)) {
+            showTooltip(event.clientX, event.clientY, 'Energy Storage Unit: Energy Reservoir');
+          } else if (context.isPointInPath(drawTransmissionPath(x, y), mouseX, mouseY)) {
+            showTooltip(event.clientX, event.clientY, 'Wireless Energy Transmission Device');
+          } else {
+            hideTooltip();
+          }
+        });
+      }
+    }
+    
+    function drawHexagon(x, y, s) {
+      context.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.PI / 3 * i;
+        const xOffset = Math.cos(angle) * s;
+        const yOffset = Math.sin(angle) * s;
+        context.lineTo(x + xOffset, y + yOffset);
+      }
+      context.closePath();
+      context.stroke();
+    }
+    
+    function drawHexagonPath(x, y, s) {
+      context.beginPath();
+      for (let i = 0; i < 6; i++) {
+        const angle = Math.PI / 3 * i;
+        const xOffset = Math.cos(angle) * s;
+        const yOffset = Math.sin(angle) * s;
+        context.lineTo(x + xOffset, y + yOffset);
+      }
+      context.closePath();
+      return context;
+    }
+    
+    function drawPiezoPath(x, y, s) {
+      context.beginPath();
+      context.arc(x, y, hexSize / 4, 0, Math.PI * 2);
+      context.closePath();
+      return context;
+    }
+    
+    function drawModulePath(x, y, s) {
+      context.beginPath();
+      context.rect(x - hexSize / 8, y - hexSize / 8, hexSize / 4, hexSize / 4);
+      context.closePath();
+      return context;
+    }
+    
+    function drawThrusterPath(x, y) {
+      context.beginPath();
+      context.arc(x + hexSize / 2, y + hexSize * Math.sqrt(3) / 2, 10, 0, Math.PI * 2);
+      context.closePath();
+      return context;
+    }
+    
+    function drawStabilizerPath(x, y) {
+      context.beginPath();
+      context.arc(x, y, 10, 0, Math.PI * 2);
+      context.closePath();
+      return context;
+    }
+    
+    function drawStoragePath(x, y) {
+      context.beginPath();
+      context.arc(x, y, hexSize / 2, 0, Math.PI * 2);
+      context.closePath();
+      return context;
+    }
+    
+    function drawTransmissionPath(x, y) {
+      context.beginPath();
+      context.moveTo(x - hexSize / 2, y);
+      context.lineTo(x - hexSize, y);
+      context.lineTo(x - hexSize, y - hexSize);
+      context.lineTo(x - hexSize / 2, y - hexSize * Math.sqrt(3) / 2);
+      context.closePath();
+      return context;
+    }
+    
+    function drawThrusters(x, y) {
+      context.fillStyle = colors.thruster;
+      context.beginPath();
+      context.arc(x + hexSize / 2, y + hexSize * Math.sqrt(3) / 2, 10, 0, Math.PI * 2);
+      context.closePath();
+      context.fill();
+    }
+    
+    function drawStabilizers(x, y) {
+      context.fillStyle = colors.stabilizer;
+      context.beginPath();
+      context.arc(x, y, 10, 0, Math.PI * 2);
+      context.closePath();
+      context.fill();
+    }
+    
+    function drawStorageUnit(x, y) {
+      context.fillStyle = colors.storage;
+      context.beginPath();
+      context.arc(x, y, hexSize / 2, 0, Math.PI * 2);
+      context.closePath();
+      context.fill();
+    }
+    
+    function drawTransmissionDevice(x, y) {
+      context.fillStyle = colors.transmission;
+      context.beginPath();
+      context.moveTo(x - hexSize / 2, y);
+      context.lineTo(x - hexSize, y);
+      context.lineTo(x - hexSize, y - hexSize);
+      context.lineTo(x - hexSize / 2, y - hexSize * Math.sqrt(3) / 2);
+      context.closePath();
+      context.fill();
+    }
+    
+    function showTooltip(x, y, text) {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.style.left = `${x}px`;
+      tooltip.style.top = `${y}px`;
+      tooltip.textContent = text;
+      tooltip.style.display = 'block';
+    }
+    
+    function hideTooltip() {
+      const tooltip = document.getElementById('tooltip');
+      tooltip.style.display = 'none';
+    }
+  </script>
+</body>
+</html>
+
