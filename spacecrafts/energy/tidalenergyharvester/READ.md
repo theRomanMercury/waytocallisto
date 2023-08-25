@@ -1,4 +1,4 @@
-**Tidal Energy Harvester with PVDF - Detailed Visual Description**
+**Tidal Energy Harvester**
 
 **Structure and Framework**:
 - The TEH is composed of a modular lattice framework, resembling a mesh structure that can be expanded to accommodate the desired number of grid units.
