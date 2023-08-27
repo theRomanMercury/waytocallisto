@@ -1,0 +1,42 @@
+import bpy
+import math
+
+# Clear existing objects
+bpy.ops.object.select_all(action='DESELECT')
+bpy.ops.object.select_by_type(type='MESH')
+bpy.ops.object.delete()
+
+# Create the central vertical axis
+bpy.ops.mesh.primitive_cylinder_add(radius=0.1, depth=10)
+axis = bpy.context.active_object
+
+# Parameters for the enhanced rotational disk array structure
+disk_count = 8
+disk_radius = 4
+disk_thickness = 0.2
+
+# Create the disks radially attached to the central axis
+for i in range(disk_count):
+    angle = i * (360 / disk_count)
+    radians = angle * (math.pi / 180)
+    
+    bpy.ops.mesh.primitive_cylinder_add(radius=disk_radius, depth=disk_thickness, vertices=16)
+    disk = bpy.context.active_object
+    disk.location = (disk_radius * math.cos(radians),
+                     disk_radius * math.sin(radians), 0)
+    
+    disk.rotation_euler = (0, 0, radians)
+    
+    # Create a material and assign it to the disk
+    material = bpy.data.materials.new(name=f"DiskMaterial{i}")
+    material.diffuse_color = (0.5 + 0.1 * i, 0.3 + 0.05 * i, 0.2 + 0.05 * i, 1)  # Adjust the color values (R, G, B, A)
+    disk.data.materials.append(material)
+
+    # Create the pivot point for disk rotation
+    bpy.ops.object.empty_add(location=disk.location)
+    pivot = bpy.context.active_object
+    disk.parent = pivot
+
+# Create a camera and light for viewing
+bpy.ops.object.camera_add(location=(15, -15, 10))
+bpy.ops.object.light_add(type='SUN', location=(0, 0, 10))
