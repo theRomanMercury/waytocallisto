@@ -14,17 +14,19 @@ axis = bpy.context.active_object
 disk_count = 8
 disk_radius = 4
 disk_thickness = 0.2
+spoke_thickness = 0.05
+bridge_thickness = 0.1  # Adjust the thickness of the bridges
 
 # Create the disks radially attached to the central axis
 for i in range(disk_count):
     angle = i * (360 / disk_count)
     radians = angle * (math.pi / 180)
     
+    # Create disk
     bpy.ops.mesh.primitive_cylinder_add(radius=disk_radius, depth=disk_thickness, vertices=16)
     disk = bpy.context.active_object
     disk.location = (disk_radius * math.cos(radians),
                      disk_radius * math.sin(radians), 0)
-    
     disk.rotation_euler = (0, 0, radians)
     
     # Create a material and assign it to the disk
@@ -36,6 +38,30 @@ for i in range(disk_count):
     bpy.ops.object.empty_add(location=disk.location)
     pivot = bpy.context.active_object
     disk.parent = pivot
+    
+    # Create spokes connecting disk to the central axis
+    bpy.ops.mesh.primitive_cylinder_add(radius=spoke_thickness, depth=disk_radius, location=(0, 0, 0.5 * disk_thickness))
+    spoke = bpy.context.active_object
+    spoke.rotation_euler = (0, 0, radians)
+    spoke.location = ((disk_radius + spoke_thickness) * math.cos(radians),
+                      (disk_radius + spoke_thickness) * math.sin(radians), 0)
+    spoke.parent = axis
+    
+    # Create bridges connecting adjacent disks
+    if i < disk_count - 1:
+        next_angle = (i + 1) * (360 / disk_count)
+        next_radians = next_angle * (math.pi / 180)
+        
+        bridge_length = disk_radius * math.sin(math.pi / disk_count)
+        bridge_location = ((disk_radius + spoke_thickness) * math.cos(next_radians),
+                           (disk_radius + spoke_thickness) * math.sin(next_radians), 0)
+        
+        bpy.ops.mesh.primitive_cylinder_add(radius=bridge_thickness, depth=bridge_length, vertices=8)
+        bridge = bpy.context.active_object
+        bridge.rotation_euler = (0, 0, radians)
+        bridge.location = bridge_location
+        bridge.rotation_euler = (0, 0, next_radians - radians)
+        bridge.parent = pivot
 
 # Create a camera and light for viewing
 bpy.ops.object.camera_add(location=(15, -15, 10))
