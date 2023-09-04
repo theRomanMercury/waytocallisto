@@ -1,0 +1,31 @@
+<!DOCTYPE html>
+<html>
+<head>
+    <title>Real-time Celestial Body Positions</title>
+    <link rel="stylesheet" type="text/css" href="{{ url_for('static', filename='style.css') }}">
+</head>
+<body>
+    <div class="container">
+        <h1>Real-time Celestial Body Positions</h1>
+        <div class="celestial-bodies">
+            <h2>Positions</h2>
+            <table>
+                <tr>
+                    <th>Celestial Body</th>
+                    <th>X Coordinate (km)</th>
+                    <th>Y Coordinate (km)</th>
+                    <th>Z Coordinate (km)</th>
+                </tr>
+                {% for body_name, position in body_positions.items() %}
+                <tr>
+                    <td>{{ body_name }}</td>
+                    <td>{{ position[0] }}</td>
+                    <td>{{ position[1] }}</td>
+                    <td>{{ position[2] }}</td>
+                </tr>
+                {% endfor %}
+            </table>
+        </div>
+    </div>
+</body>
+</html>
