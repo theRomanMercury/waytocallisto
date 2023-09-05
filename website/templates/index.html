@@ -1,0 +1,65 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>3D Solar System</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/three.js/r128/three.min.js"></script>
+   
+</head>
+<body>
+    <div id="scene-container"></div>
+
+    <script>
+        const scene = new THREE.Scene();
+        const camera = new THREE.PerspectiveCamera(75, window.innerWidth / window.innerHeight, 0.1, 1000);
+        camera.position.z = 5;
+
+        const renderer = new THREE.WebGLRenderer();
+        renderer.setSize(window.innerWidth, window.innerHeight);
+        document.getElementById('scene-container').appendChild(renderer.domElement);
+
+        const animate = (object, rotationSpeed) => {
+            requestAnimationFrame(() => animate(object, rotationSpeed));
+            object.rotation.y += rotationSpeed;
+            renderer.render(scene, camera);
+        };
+
+        // Dünya'nın yüklenmesi
+        const earthLoader = new THREE.GLTFLoader();
+        earthLoader.load('https://github.com/theRomanMercury/waytocallisto/raw/main/AstronomicalBodies/SolarSystem/Earth_1_12756.glb', (gltf) => {
+            const earth = gltf.scene;
+            scene.add(earth);
+
+            const earthRotationSpeed = 0.0001;
+            animate(earth, earthRotationSpeed);
+        });
+
+        // Güneş'in yüklenmesi
+        const sunLoader = new THREE.GLTFLoader();
+        sunLoader.load('https://github.com/theRomanMercury/waytocallisto/raw/main/AstronomicalBodies/SolarSystem/Sun_1_1391000.glb', (gltf) => {
+            const sun = gltf.scene;
+            scene.add(sun);
+
+            const sunRotationSpeed = 0.00003;
+            animate(sun, sunRotationSpeed);
+        });
+
+        // Gezegenlerin koordinatlarını güncelleme işlevi
+        const updatePlanetPosition = () => {
+            fetch('/getPlanetCoordinates') // Yeni oluşturduğunuz Flask endpoint'i
+                .then(response => response.json())
+                .then(data => {
+                    const sunCoords = data['Sun'];
+                    const earthCoords = data['Dünya'];
+                    // Diğer gezegenlerin koordinatlarını kullanabilirsiniz
+                    // ...
+                })
+                .catch(error => console.error('Koordinatlar alınamadı:', error));
+        };
+
+        // Belirli bir süre aralığında koordinatları güncelleyin (örneğin, her saniye)
+        setInterval(updatePlanetPosition, 1000);
+    </script>
+</body>
+</html>
