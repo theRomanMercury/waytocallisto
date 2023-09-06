@@ -4,12 +4,15 @@
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
     <title>3D Solar System</title>
-     
+    <script type="module">
+        import * as THREE from './static/js/node_modules/three/build/three.module.js'; // Adjust the path to match the location of your Three.js file
+        import { GLTFLoader } from './static/js/node_modules/three/src/loaders/GLTFLoader.js'; // Adjust the path to match the location of your GLTFLoader.js file
+    </script>    
 </head>
 <body>
     <div id="scene-container"></div>
 
-    <script type="importmap">
+    <script type="module">
 
         import * as THREE from './static/js/node_modules/three/build/three.module.js';
 
